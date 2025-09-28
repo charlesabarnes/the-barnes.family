@@ -1,0 +1,370 @@
+---
+---
+
+// Variables
+$color-forest: #2d5a3d;
+$color-sage: #7c9885;
+$color-sand: #d4c5a9;
+$color-cream: #f5f2ed;
+$color-bark: #8b6f47;
+$color-moss: #5a7c65;
+
+$font-serif: 'Playfair Display', Georgia, serif;
+$font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+$breakpoint-sm: 480px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+
+// Reset and Base
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: $font-sans;
+  font-weight: 400;
+  line-height: 1.6;
+  color: $color-forest;
+  background-color: $color-cream;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Typography
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: $color-forest;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1.125rem; }
+
+@media (max-width: $breakpoint-md) {
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.5rem; }
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+a {
+  color: $color-moss;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $color-forest;
+    text-decoration: underline;
+  }
+}
+
+// Container
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0 1rem;
+  }
+}
+
+// Header
+.site-header {
+  background-color: white;
+  border-bottom: 2px solid $color-sand;
+  padding: 1.5rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(45, 90, 61, 0.05);
+}
+
+.site-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.site-title {
+  font-family: $font-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: $color-forest;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: none;
+    color: $color-moss;
+  }
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+
+  a {
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $color-sage;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: $color-moss;
+      transform: scaleX(0);
+      transition: transform 0.2s ease;
+    }
+
+    &:hover {
+      color: $color-forest;
+      text-decoration: none;
+
+      &::after {
+        transform: scaleX(1);
+      }
+    }
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .site-nav {
+    justify-content: center;
+  }
+
+  .nav-links {
+    gap: 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+// Main Content
+.site-content {
+  flex: 1;
+  padding: 3rem 0;
+
+  @media (max-width: $breakpoint-md) {
+    padding: 2rem 0;
+  }
+}
+
+// Footer
+.site-footer {
+  background-color: $color-forest;
+  color: $color-cream;
+  padding: 2rem 0;
+  margin-top: 4rem;
+  text-align: center;
+
+  p {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .footer-stickers {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+}
+
+// Page Styles
+.page-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid $color-sand;
+}
+
+.page-subtitle {
+  font-size: 1.125rem;
+  color: $color-sage;
+  font-weight: 400;
+  margin-top: 0.5rem;
+}
+
+.page-body {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+// Newsletter Styles
+.newsletter-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.newsletter-meta {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  color: $color-sage;
+
+  time {
+    font-style: italic;
+  }
+
+  .occasion {
+    font-weight: 500;
+    color: $color-moss;
+  }
+}
+
+.newsletter-image {
+  margin: 2rem 0;
+  text-align: center;
+
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(45, 90, 61, 0.1);
+  }
+
+  .download-link {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background-color: $color-moss;
+    color: white;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: $color-forest;
+      text-decoration: none;
+    }
+  }
+}
+
+.newsletter-content {
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.newsletter-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid $color-sand;
+
+  a {
+    padding: 0.5rem 1rem;
+    background-color: white;
+    border: 1px solid $color-sand;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: $color-sand;
+      text-decoration: none;
+    }
+  }
+
+  .nav-prev {
+    margin-right: auto;
+  }
+
+  .nav-next {
+    margin-left: auto;
+  }
+}
+
+// Stickers
+.sticker {
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.newsletter-stickers,
+.album-stickers {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+// Utilities
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+// Cards
+.card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(45, 90, 61, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(45, 90, 61, 0.12);
+  }
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}

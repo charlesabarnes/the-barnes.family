@@ -1,0 +1,75 @@
+---
+layout: page
+title: Newsletter Archive
+permalink: /archive/
+---
+
+<div class="archive-grid">
+  {% assign newsletters_by_year = site.newsletters | group_by_exp: "newsletter", "newsletter.date | date: '%Y'" | reverse %}
+
+  {% for year in newsletters_by_year %}
+  <section class="archive-year">
+    <h2 style="color: #5a7c65; border-bottom: 2px solid #d4c5a9; padding-bottom: 0.5rem; margin-bottom: 2rem;">
+      {{ year.name }}
+    </h2>
+
+    <div class="card-grid">
+      {% assign sorted_items = year.items | sort: "date" | reverse %}
+      {% for newsletter in sorted_items %}
+      <div class="card">
+        <h3 style="margin-bottom: 0.75rem;">
+          <a href="{{ newsletter.url | relative_url }}" style="color: #2d5a3d;">
+            {{ newsletter.title }}
+          </a>
+        </h3>
+
+        <div style="color: #7c9885; font-size: 0.9rem; margin-bottom: 1rem;">
+          <time datetime="{{ newsletter.date | date: '%Y-%m-%d' }}">
+            {{ newsletter.date | date: "%B %d, %Y" }}
+          </time>
+          {% if newsletter.occasion %}
+          <span style="margin-left: 1rem; color: #5a7c65;">
+            {{ newsletter.occasion }}
+          </span>
+          {% endif %}
+        </div>
+
+        {% if newsletter.excerpt %}
+        <p style="line-height: 1.6;">
+          {{ newsletter.excerpt | strip_html | truncate: 200 }}
+        </p>
+        {% endif %}
+
+        <a href="{{ newsletter.url | relative_url }}" style="display: inline-block; margin-top: 1rem; color: #5a7c65; font-weight: 500;">
+          View Newsletter →
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+
+  {% if site.newsletters.size == 0 %}
+  <div class="text-center" style="padding: 3rem 0;">
+    <h2 style="color: #5a7c65; margin-bottom: 1rem;">Coming Soon</h2>
+    <p style="color: #7c9885; font-size: 1.125rem; max-width: 600px; margin: 0 auto;">
+      We're working on digitizing our newsletters and cards. Check back soon to see our collection of family updates and holiday greetings!
+    </p>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+  .archive-grid {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .archive-year {
+    margin-bottom: 3rem;
+  }
+
+  .archive-year:last-child {
+    margin-bottom: 0;
+  }
+</style>

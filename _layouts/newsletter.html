@@ -1,0 +1,56 @@
+---
+layout: default
+---
+
+<div class="container newsletter-content">
+  <header class="newsletter-header">
+    <h1>{{ page.title }}</h1>
+    <div class="newsletter-meta">
+      <time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: '%B %d, %Y' }}</time>
+      {% if page.occasion %}
+        <span class="occasion">{{ page.occasion }}</span>
+      {% endif %}
+    </div>
+  </header>
+
+  <article class="newsletter-body">
+    {% if page.featured_image %}
+      <div class="newsletter-image">
+        {% include cloudflare-image.html
+           src=page.featured_image
+           alt=page.title
+           sizes="(max-width: 768px) 100vw, 1200px"
+           loading="eager"
+        %}
+        <a href="{{ page.featured_image }}" class="download-link" download>
+          Download Full Resolution
+        </a>
+      </div>
+    {% endif %}
+
+    <div class="newsletter-content">
+      {{ content }}
+    </div>
+
+    {% if page.stickers %}
+      <div class="newsletter-stickers">
+        {% for sticker in page.stickers %}
+          {% include sticker.html name=sticker %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </article>
+
+  <nav class="newsletter-nav">
+    {% if page.previous.url %}
+      <a href="{{ page.previous.url | relative_url }}" class="nav-prev">
+        &larr; {{ page.previous.title }}
+      </a>
+    {% endif %}
+    {% if page.next.url %}
+      <a href="{{ page.next.url | relative_url }}" class="nav-next">
+        {{ page.next.title }} &rarr;
+      </a>
+    {% endif %}
+  </nav>
+</div>

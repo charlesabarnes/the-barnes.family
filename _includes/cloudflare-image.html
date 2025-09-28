@@ -1,0 +1,51 @@
+{% comment %}
+  Cloudflare Images Integration Helper
+
+  Usage:
+  {% include cloudflare-image.html
+     src="image-id-or-path"
+     alt="Alt text"
+     sizes="(max-width: 768px) 100vw, 50vw"
+     loading="lazy"
+     class="custom-class"
+     data-full="full-res-url"
+  %}
+{% endcomment %}
+
+{% assign cf_base = site.cloudflare.images_url %}
+{% assign cf_account = site.cloudflare.account_hash %}
+
+{% comment %} Build the Cloudflare Images URL with variants {% endcomment %}
+{% if include.src contains "http" %}
+  {% assign image_url = include.src %}
+{% else %}
+  {% assign image_url = cf_base | append: "/" | append: cf_account | append: "/" | append: include.src | append: "/public" %}
+{% endif %}
+
+{% comment %} Generate responsive image URLs {% endcomment %}
+{% assign image_small = image_url | replace: "/public", "/small" %}
+{% assign image_medium = image_url | replace: "/public", "/medium" %}
+{% assign image_large = image_url | replace: "/public", "/large" %}
+
+<picture>
+  <source
+    media="(max-width: 480px)"
+    srcset="{{ image_small }}"
+  >
+  <source
+    media="(max-width: 768px)"
+    srcset="{{ image_medium }}"
+  >
+  <source
+    media="(min-width: 769px)"
+    srcset="{{ image_large }}"
+  >
+  <img
+    src="{{ image_medium }}"
+    alt="{{ include.alt | default: 'Barnes Family Photo' }}"
+    loading="{{ include.loading | default: 'lazy' }}"
+    {% if include.sizes %}sizes="{{ include.sizes }}"{% endif %}
+    {% if include.class %}class="{{ include.class }}"{% endif %}
+    {% if include.data-full %}data-full="{{ include.data-full }}"{% endif %}
+  >
+</picture>

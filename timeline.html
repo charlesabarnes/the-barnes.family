@@ -1,0 +1,163 @@
+---
+layout: page
+title: Our Timeline
+permalink: /timeline/
+---
+
+<style>
+  .timeline {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 0;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, #5a7c65, #7c9885);
+  }
+
+  .timeline-item {
+    position: relative;
+    padding: 2rem 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .timeline-item:nth-child(odd) {
+    flex-direction: row-reverse;
+  }
+
+  .timeline-content {
+    width: 45%;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(45, 90, 61, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .timeline-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(45, 90, 61, 0.12);
+  }
+
+  .timeline-marker {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background: #5a7c65;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(45, 90, 61, 0.2);
+  }
+
+  .timeline-date {
+    font-weight: 600;
+    color: #5a7c65;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .timeline-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #2d5a3d;
+  }
+
+  .timeline-description {
+    color: #7c9885;
+    line-height: 1.6;
+  }
+
+  .timeline-link {
+    display: inline-block;
+    margin-top: 0.75rem;
+    color: #5a7c65;
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .timeline::before {
+      left: 20px;
+    }
+
+    .timeline-item,
+    .timeline-item:nth-child(odd) {
+      flex-direction: row;
+    }
+
+    .timeline-content {
+      width: calc(100% - 60px);
+      margin-left: 60px;
+    }
+
+    .timeline-marker {
+      left: 20px;
+    }
+  }
+</style>
+
+<div class="timeline">
+  {% assign all_events = "" | split: "" %}
+
+  {% for newsletter in site.newsletters %}
+    {% assign all_events = all_events | push: newsletter %}
+  {% endfor %}
+
+  {% for album in site.albums %}
+    {% assign all_events = all_events | push: album %}
+  {% endfor %}
+
+  {% for event in site.timeline %}
+    {% assign all_events = all_events | push: event %}
+  {% endfor %}
+
+  {% assign sorted_events = all_events | sort: "date" | reverse %}
+
+  {% for event in sorted_events %}
+  <div class="timeline-item">
+    <div class="timeline-content">
+      <div class="timeline-date">
+        {{ event.date | date: "%B %Y" }}
+      </div>
+      <h3 class="timeline-title">{{ event.title }}</h3>
+      {% if event.description %}
+      <p class="timeline-description">{{ event.description }}</p>
+      {% elsif event.excerpt %}
+      <p class="timeline-description">{{ event.excerpt | strip_html | truncate: 150 }}</p>
+      {% endif %}
+      {% if event.url %}
+      <a href="{{ event.url | relative_url }}" class="timeline-link">
+        {% if event.collection == "albums" %}
+          View Gallery →
+        {% elsif event.collection == "newsletters" %}
+          Read More →
+        {% else %}
+          Learn More →
+        {% endif %}
+      </a>
+      {% endif %}
+    </div>
+    <div class="timeline-marker"></div>
+  </div>
+  {% endfor %}
+
+  {% if sorted_events.size == 0 %}
+  <div class="text-center" style="padding: 3rem 0;">
+    <p style="color: #7c9885; font-size: 1.125rem;">
+      Our timeline is just beginning. Check back soon as we add more memories!
+    </p>
+  </div>
+  {% endif %}
+</div>

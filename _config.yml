@@ -1,0 +1,90 @@
+# Site settings
+title: The Barnes Family
+email: hello@the-barnes.family
+description: >-
+  The official hub for Barnes family newsletters, cards, and memories.
+  Featuring Charles & Kelly Barnes, and our dogs Dev & Cobol.
+baseurl: ""
+url: "https://the-barnes.family"
+timezone: America/New_York
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+  - jekyll-feed
+  - jekyll-paginate
+  - jekyll-archives
+
+# Pagination
+paginate: 10
+paginate_path: "/page/:num/"
+
+# Collections
+collections:
+  newsletters:
+    output: true
+    permalink: /newsletters/:name/
+  albums:
+    output: true
+    permalink: /albums/:name/
+  timeline:
+    output: false
+    sort_by: date
+
+# Default values
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+  - scope:
+      path: ""
+      type: "newsletters"
+    values:
+      layout: "newsletter"
+  - scope:
+      path: ""
+      type: "albums"
+    values:
+      layout: "album"
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "page"
+
+# Jekyll Archives
+jekyll-archives:
+  enabled:
+    - year
+    - categories
+  layout: archive
+  permalinks:
+    year: '/:year/'
+    category: '/category/:name/'
+
+# Cloudflare settings (custom variables)
+cloudflare:
+  images_url: "https://imagedelivery.net"
+  account_hash: "YOUR_ACCOUNT_HASH"
+  r2_bucket: "barnes-family-images"
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - .devcontainer/
+
+# Site metadata
+author:
+  name: Charles & Kelly Barnes
+  email: hello@the-barnes.family
+
+# Social links (if needed later)
+social:
+  - name: Email
+    link: mailto:hello@the-barnes.family

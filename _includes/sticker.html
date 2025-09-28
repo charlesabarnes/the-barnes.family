@@ -1,0 +1,114 @@
+{% comment %}
+  Sticker System Helper
+
+  Usage:
+  {% include sticker.html name="basenji" %}
+  {% include sticker.html name="mountain" size="large" %}
+{% endcomment %}
+
+{% assign sticker_name = include.name %}
+{% assign sticker_size = include.size | default: "normal" %}
+
+{% comment %} Size classes {% endcomment %}
+{% case sticker_size %}
+  {% when "small" %}
+    {% assign size_class = "sticker-small" %}
+  {% when "large" %}
+    {% assign size_class = "sticker-large" %}
+  {% else %}
+    {% assign size_class = "sticker" %}
+{% endcase %}
+
+{% comment %} Check if PNG file exists, otherwise use emoji fallback {% endcomment %}
+{% assign sticker_path = "/assets/stickers/" | append: sticker_name | append: ".png" %}
+
+<span class="{{ size_class }}" data-sticker="{{ sticker_name }}">
+  {% case sticker_name %}
+    {% when "basenji" %}
+      🐕
+    {% when "border-collie" %}
+      🐕‍🦺
+    {% when "wedding" %}
+      💍
+    {% when "mountain" %}
+      ⛰️
+    {% when "love" %}
+      ❤️
+    {% when "lighthouse" %}
+      🗼
+    {% when "lobster" %}
+      🦞
+    {% when "ocean" %}
+      🌊
+    {% when "forest" %}
+      🌲
+    {% when "canada" %}
+      🍁
+    {% when "whale" %}
+      🐋
+    {% when "christmas" %}
+      🎄
+    {% when "camera" %}
+      📷
+    {% when "airplane" %}
+      ✈️
+    {% when "hiking" %}
+      🥾
+    {% when "camping" %}
+      ⛺
+    {% when "sunset" %}
+      🌅
+    {% when "coffee" %}
+      ☕
+    {% when "wine" %}
+      🍷
+    {% when "beach" %}
+      🏖️
+    {% when "snow" %}
+      ❄️
+    {% when "spring" %}
+      🌸
+    {% when "summer" %}
+      ☀️
+    {% when "fall" %}
+      🍂
+    {% when "winter" %}
+      ⛄
+    {% else %}
+      🏷️
+  {% endcase %}
+</span>
+
+<style>
+  .sticker, .sticker-small, .sticker-large {
+    display: inline-block;
+    text-align: center;
+    transition: transform 0.2s ease;
+    cursor: default;
+  }
+
+  .sticker {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+  }
+
+  .sticker-small {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+  }
+
+  .sticker-large {
+    font-size: 3.5rem;
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+  }
+
+  .sticker:hover, .sticker-small:hover, .sticker-large:hover {
+    transform: scale(1.2) rotate(10deg);
+  }
+</style>

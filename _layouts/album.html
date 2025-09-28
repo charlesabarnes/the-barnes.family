@@ -1,0 +1,75 @@
+---
+layout: default
+custom_css: /assets/css/gallery.css
+custom_js: /assets/js/gallery.js
+---
+
+<div class="container album-content">
+  <header class="album-header">
+    <h1>{{ page.title }}</h1>
+    <div class="album-meta">
+      {% if page.date %}
+        <time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: '%B %Y' }}</time>
+      {% endif %}
+      {% if page.location %}
+        <span class="location">{{ page.location }}</span>
+      {% endif %}
+      {% if page.photo_count %}
+        <span class="photo-count">{{ page.photo_count }} photos</span>
+      {% endif %}
+    </div>
+  </header>
+
+  {% if page.description %}
+    <div class="album-description">
+      {{ page.description | markdownify }}
+    </div>
+  {% endif %}
+
+  <div class="album-actions">
+    <button class="btn-download-all" data-album="{{ page.slug }}">
+      Download All Photos
+    </button>
+  </div>
+
+  <div class="photo-gallery" id="gallery-{{ page.slug }}">
+    {% for photo in page.photos %}
+      <div class="photo-item">
+        {% include cloudflare-image.html
+           src=photo.src
+           alt=photo.alt
+           sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, 33vw"
+           loading="lazy"
+           class="gallery-image"
+           data-full=photo.src
+        %}
+        <div class="photo-overlay">
+          <a href="{{ photo.src }}" class="btn-download" download>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+            </svg>
+          </a>
+          <button class="btn-fullscreen" data-src="{{ photo.src }}" data-alt="{{ photo.alt }}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if page.stickers %}
+    <div class="album-stickers">
+      {% for sticker in page.stickers %}
+        {% include sticker.html name=sticker %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close">&times;</button>
+  <img class="lightbox-image" src="" alt="">
+  <div class="lightbox-caption"></div>
+</div>

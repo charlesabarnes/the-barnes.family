@@ -1,0 +1,88 @@
+---
+layout: default
+---
+
+<div class="container">
+  <section class="hero">
+    <h1 class="text-center" style="font-size: 3rem; margin-bottom: 1rem;">Welcome to the Barnes Family</h1>
+    <p class="text-center" style="font-size: 1.25rem; color: #7c9885; max-width: 600px; margin: 0 auto 3rem;">
+      Join Charles, Kelly, Dev & Cobol on our adventures through life, love, and everything in between.
+    </p>
+  </section>
+
+  <section class="featured-content">
+    <h2 class="text-center mb-4">Latest Updates</h2>
+
+    <div class="card-grid">
+      {% assign latest_newsletter = site.newsletters | last %}
+      {% if latest_newsletter %}
+      <div class="card">
+        <h3>{{ latest_newsletter.title }}</h3>
+        <p class="mb-2" style="color: #7c9885; font-size: 0.95rem;">
+          <time datetime="{{ latest_newsletter.date | date: '%Y-%m-%d' }}">
+            {{ latest_newsletter.date | date: '%B %d, %Y' }}
+          </time>
+        </p>
+        <p>{{ latest_newsletter.excerpt | strip_html | truncate: 150 }}</p>
+        <a href="{{ latest_newsletter.url | relative_url }}" style="font-weight: 500; color: #5a7c65;">
+          Read More →
+        </a>
+      </div>
+      {% endif %}
+
+      {% assign latest_albums = site.albums | reverse | limit: 2 %}
+      {% for album in latest_albums %}
+      <div class="card">
+        <h3>{{ album.title }}</h3>
+        {% if album.location %}
+        <p class="mb-2" style="color: #7c9885; font-size: 0.95rem;">
+          {{ album.location }}
+        </p>
+        {% endif %}
+        <p>{{ album.description | strip_html | truncate: 150 }}</p>
+        <a href="{{ album.url | relative_url }}" style="font-weight: 500; color: #5a7c65;">
+          View Gallery →
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="quick-links mt-4">
+    <h2 class="text-center mb-4">Explore Our Journey</h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; max-width: 800px; margin: 0 auto;">
+      <a href="{{ '/timeline/' | relative_url }}" class="card text-center" style="text-decoration: none; color: inherit;">
+        <h4 style="color: #5a7c65; margin-bottom: 0.5rem;">Timeline</h4>
+        <p style="font-size: 0.95rem; margin: 0;">Follow our story chronologically</p>
+      </a>
+
+      <a href="{{ '/archive/' | relative_url }}" class="card text-center" style="text-decoration: none; color: inherit;">
+        <h4 style="color: #5a7c65; margin-bottom: 0.5rem;">Archive</h4>
+        <p style="font-size: 0.95rem; margin: 0;">Browse all newsletters & cards</p>
+      </a>
+
+      <a href="{{ '/gallery/' | relative_url }}" class="card text-center" style="text-decoration: none; color: inherit;">
+        <h4 style="color: #5a7c65; margin-bottom: 0.5rem;">Gallery</h4>
+        <p style="font-size: 0.95rem; margin: 0;">View our photo collections</p>
+      </a>
+
+      <a href="{{ '/about/' | relative_url }}" class="card text-center" style="text-decoration: none; color: inherit;">
+        <h4 style="color: #5a7c65; margin-bottom: 0.5rem;">About Us</h4>
+        <p style="font-size: 0.95rem; margin: 0;">Meet the Barnes family</p>
+      </a>
+    </div>
+  </section>
+
+  {% if site.newsletters.size > 0 or site.albums.size > 0 %}
+  <section class="recent-activity mt-4">
+    <h2 class="text-center mb-4">Recent Memories</h2>
+
+    <div class="text-center">
+      <p style="color: #7c9885; max-width: 600px; margin: 0 auto;">
+        We're building our collection of memories. Check back soon for more updates, or explore what we've shared so far!
+      </p>
+    </div>
+  </section>
+  {% endif %}
+</div>
