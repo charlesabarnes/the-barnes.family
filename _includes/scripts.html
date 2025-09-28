@@ -1,0 +1,10 @@
+{% comment %}
+  Centralized script management
+  Add any global scripts here
+{% endcomment %}
+
+{% if page.custom_js %}
+  <script src="{{ page.custom_js | relative_url }}"></script>
+{% endif %}
+
+{% comment %} Add any global JavaScript here {% endcomment %}

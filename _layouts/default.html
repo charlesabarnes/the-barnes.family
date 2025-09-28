@@ -1,55 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
-
-  {% seo %}
-  {% feed_meta %}
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
-
-  {% if page.custom_css %}
-    <link rel="stylesheet" href="{{ page.custom_css | relative_url }}">
-  {% endif %}
+  {% include head.html %}
 </head>
 <body>
-  <header class="site-header">
-    <div class="container">
-      <nav class="site-nav">
-        <a href="{{ '/' | relative_url }}" class="site-title">{{ site.title }}</a>
-
-        <div class="nav-links">
-          <a href="{{ '/about/' | relative_url }}">About</a>
-          <a href="{{ '/timeline/' | relative_url }}">Timeline</a>
-          <a href="{{ '/archive/' | relative_url }}">Archive</a>
-          <a href="{{ '/gallery/' | relative_url }}">Gallery</a>
-        </div>
-      </nav>
-    </div>
-  </header>
+  {% include header.html %}
 
   <main class="site-content">
     {{ content }}
   </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>&copy; {{ 'now' | date: '%Y' }} The Barnes Family. Made with love by Charles & Kelly.</p>
-      <div class="footer-stickers">
-        {% include sticker.html name="basenji" %}
-        {% include sticker.html name="border-collie" %}
-      </div>
-    </div>
-  </footer>
-
-  {% if page.custom_js %}
-    <script src="{{ page.custom_js | relative_url }}"></script>
-  {% endif %}
+  {% include footer.html %}
+  {% include scripts.html %}
 </body>
 </html>
