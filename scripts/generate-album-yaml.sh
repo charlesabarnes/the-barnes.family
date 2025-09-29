@@ -1,72 +1,57 @@
 #!/bin/bash
 
-# Generate YAML photo list for album markdown files
-# Based on uploaded images in Cloudflare
+# Script to generate YAML photo lists for albums from uploaded images
 
-# Colors for output
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+echo "Generating YAML for uploaded images..."
+echo ""
 
-# Function to generate YAML for a directory
+# Function to generate YAML for a specific prefix
 generate_yaml() {
-    local dir=$1
-    local prefix=$2
-    local output_file=$3
+    local prefix=$1
+    local album_name=$2
 
-    echo -e "${YELLOW}Generating YAML for: ${dir}${NC}"
+    echo "# $album_name"
+    echo "photos:"
 
-    # Start YAML photo list
-    echo "photos:" > "$output_file"
-
-    # Process each image in directory
-    for image in "$dir"/*.{jpg,jpeg,png,gif,webp} 2>/dev/null; do
-        [ -e "$image" ] || continue
-
-        # Generate ID matching upload script
-        filename=$(basename "$image")
-        name_without_ext="${filename%.*}"
-        custom_id="${prefix}-${name_without_ext}"
-        custom_id=$(echo "$custom_id" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g')
-
-        # Generate human-readable alt text
-        alt_text=$(echo "$name_without_ext" | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
-
-        # Add to YAML
-        echo "  - src: \"$custom_id\"" >> "$output_file"
-        echo "    alt: \"$alt_text\"" >> "$output_file"
+    # Filter uploaded images by prefix and generate YAML
+    grep "^$prefix-" uploaded-images.log 2>/dev/null | while read -r image_id; do
+        # Extract the number/name part after the prefix
+        local name_part=${image_id#$prefix-}
+        echo "  - src: \"$image_id\""
+        echo "    alt: \"Photo $name_part\""
     done
-
-    echo -e "${GREEN}✓ Generated: ${output_file}${NC}"
+    echo ""
 }
 
-# Main execution
-echo "==================================="
-echo "Album YAML Generator"
-echo "==================================="
-echo "This will generate photo lists for your album markdown files"
+# Generate for each album
+echo "---"
+echo "layout: album"
+echo "title: \"Your Album Title\""
+echo "date: $(date +%Y-%m-%d)"
+echo "cover_image: \"CHANGE_ME\""
 echo ""
 
-# Create output directory
-mkdir -p generated-yaml
-
-# Generate YAML for each album
-if [ -d "local-images/2024-maine-summer" ]; then
-    generate_yaml "local-images/2024-maine-summer" "maine" "generated-yaml/2024-maine-summer-photos.yaml"
+# Check which prefixes have uploaded images based on folder names
+if grep -q "^2025-elopement-announcement-" uploaded-images.log 2>/dev/null; then
+    generate_yaml "2025-elopement-announcement" "Elopement Announcement"
 fi
 
-if [ -d "local-images/2025-elopement-photos" ]; then
-    generate_yaml "local-images/2025-elopement-photos" "elopement" "generated-yaml/2025-elopement-photos.yaml"
+if grep -q "^2025-bc-honeymoon-" uploaded-images.log 2>/dev/null; then
+    generate_yaml "2025-bc-honeymoon" "BC Honeymoon"
 fi
 
-if [ -d "local-images/2025-british-columbia-honeymoon" ]; then
-    generate_yaml "local-images/2025-british-columbia-honeymoon" "bc" "generated-yaml/2025-british-columbia-honeymoon.yaml"
+if grep -q "^2025-vancouver-honeymoon-" uploaded-images.log 2>/dev/null; then
+    generate_yaml "2025-vancouver-honeymoon" "Vancouver Honeymoon"
 fi
 
+if grep -q "^2024-maine-summer-" uploaded-images.log 2>/dev/null; then
+    generate_yaml "2024-maine-summer" "Maine Summer 2024"
+fi
+
+if grep -q "^newsletters-" uploaded-images.log 2>/dev/null; then
+    generate_yaml "newsletters" "Newsletters"
+fi
+
+echo "---"
 echo ""
-echo -e "${GREEN}YAML generation complete!${NC}"
-echo "Copy the contents from generated-yaml/*.yaml to your album markdown files"
-echo ""
-echo "Example usage:"
-echo "  cat generated-yaml/2024-maine-summer-photos.yaml"
-echo "  # Then copy to _albums/2024-maine-summer.md"
+echo "Add your album description here..."

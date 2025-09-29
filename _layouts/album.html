@@ -26,37 +26,102 @@ custom_js: /assets/js/gallery.js
     </div>
   {% endif %}
 
-  <div class="album-actions">
-    <button class="btn-download-all" data-album="{{ page.slug }}">
-      Download All Photos
-    </button>
-  </div>
 
   <div class="photo-gallery" id="gallery-{{ page.slug }}">
-    {% for photo in page.photos %}
-      <div class="photo-item">
-        {% include cloudflare-image.html
-           src=photo.src
-           alt=photo.alt
-           sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, 33vw"
-           loading="lazy"
-           class="gallery-image"
-           data-full=photo.src
-        %}
-        <div class="photo-overlay">
-          <a href="{{ photo.src }}" class="btn-download" download>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-            </svg>
-          </a>
-          <button class="btn-fullscreen" data-src="{{ photo.src }}" data-alt="{{ photo.alt }}">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
-            </svg>
-          </button>
+    {% comment %}
+    If the page has manually specified photos, use those
+    Otherwise, automatically load all images from the matching folder
+    {% endcomment %}
+
+    {% if page.photos %}
+      {% comment %} Manual photo list {% endcomment %}
+      {% for photo in page.photos %}
+        <div class="photo-item">
+          {% include r2-image.html
+             src=photo.src
+             alt=photo.alt
+             sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, 33vw"
+             loading="lazy"
+             class="gallery-image"
+             data-full=photo.src
+          %}
+          <div class="photo-overlay">
+            {% assign r2_url = site.cloudflare.r2_public_url | append: "/" | append: photo.src %}
+            <a href="{{ r2_url }}" class="btn-download" download>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+              </svg>
+            </a>
+            <button class="btn-fullscreen" data-src="{{ photo.src }}" data-alt="{{ photo.alt }}" data-original="{{ r2_url }}">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
-    {% endfor %}
+      {% endfor %}
+    {% elsif page.folder and site.data.r2_images %}
+      {% comment %} Automatic photo loading from R2 JSON data {% endcomment %}
+      {% assign album_images = site.data.r2_images.images | where: "folder", page.folder %}
+      {% for image in album_images %}
+        {% if image.status == "success" or image.status == "existing" %}
+        <div class="photo-item">
+          {% include r2-image.html
+             src=image.r2_path
+             alt=image.filename
+             sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, 33vw"
+             loading="lazy"
+             class="gallery-image"
+             data-full=image.r2_path
+          %}
+          <div class="photo-overlay">
+            <a href="{{ image.url }}" class="btn-download" download="{{ image.filename }}">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+              </svg>
+            </a>
+            <button class="btn-fullscreen" data-src="{{ image.r2_path }}" data-alt="{{ image.filename }}" data-original="{{ image.url }}">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        {% endif %}
+      {% endfor %}
+    {% elsif page.folder and site.data.images %}
+      {% comment %} Fallback to old Cloudflare Images data {% endcomment %}
+      {% assign album_images = site.data.images.images | where: "folder", page.folder %}
+      {% for image in album_images %}
+        {% if image.status == "success" or image.status == "existing" %}
+        <div class="photo-item">
+          {% include cloudflare-image.html
+             src=image.cloudflare_id
+             alt=image.filename
+             sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, 33vw"
+             loading="lazy"
+             class="gallery-image"
+             data-full=image.cloudflare_id
+          %}
+          <div class="photo-overlay">
+            <a href="{{ site.cloudflare.images_url }}/{{ site.cloudflare.account_hash }}/{{ image.cloudflare_id }}/public" class="btn-download" download="{{ image.filename }}">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+              </svg>
+            </a>
+            <button class="btn-fullscreen" data-src="{{ image.cloudflare_id }}" data-alt="{{ image.filename }}">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      {% comment %} No photos specified and no matching folder data {% endcomment %}
+      <p class="no-photos">No photos available for this album.</p>
+    {% endif %}
   </div>
 
   {% if page.stickers %}

@@ -11,11 +11,15 @@
   // Open lightbox
   document.querySelectorAll('.btn-fullscreen').forEach(button => {
     button.addEventListener('click', function() {
-      const src = this.getAttribute('data-src');
+      const imageSrc = this.getAttribute('data-src');
       const alt = this.getAttribute('data-alt');
+      const originalUrl = this.getAttribute('data-original');
 
       if (lightbox && lightboxImage) {
-        lightboxImage.src = src;
+        // Use the original R2 URL for full size image
+        const fullImageUrl = originalUrl || imageSrc;
+
+        lightboxImage.src = fullImageUrl;
         lightboxImage.alt = alt;
         if (lightboxCaption) {
           lightboxCaption.textContent = alt;
@@ -56,48 +60,6 @@
     }
   }
 
-  // Download all photos functionality
-  document.querySelectorAll('.btn-download-all').forEach(button => {
-    button.addEventListener('click', async function() {
-      const albumSlug = this.getAttribute('data-album');
-      const gallery = document.getElementById(`gallery-${albumSlug}`);
-
-      if (!gallery) return;
-
-      const images = gallery.querySelectorAll('.gallery-image');
-      const originalText = this.textContent;
-
-      this.textContent = 'Preparing download...';
-      this.disabled = true;
-
-      // Create a delay to avoid overwhelming the browser
-      const downloadImage = (url, index) => {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${albumSlug}-photo-${index + 1}`;
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            resolve();
-          }, index * 200); // 200ms delay between downloads
-        });
-      };
-
-      const downloadPromises = [];
-      images.forEach((img, index) => {
-        const fullUrl = img.getAttribute('data-full') || img.src;
-        downloadPromises.push(downloadImage(fullUrl, index));
-      });
-
-      await Promise.all(downloadPromises);
-
-      this.textContent = originalText;
-      this.disabled = false;
-    });
-  });
 
   // Lazy loading for images (fallback if native loading="lazy" not supported)
   if ('IntersectionObserver' in window) {

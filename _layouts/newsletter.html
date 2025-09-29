@@ -26,6 +26,24 @@ layout: default
           Download Full Resolution
         </a>
       </div>
+    {% elsif page.folder and site.data.images %}
+      {% comment %} Automatic image loading from folder {% endcomment %}
+      {% assign newsletter_images = site.data.images.images | where: "folder", page.folder %}
+      {% for image in newsletter_images %}
+        {% if image.status == "success" or image.status == "existing" %}
+        <div class="newsletter-image">
+          {% include cloudflare-image.html
+             src=image.cloudflare_id
+             alt=image.filename
+             sizes="(max-width: 768px) 100vw, 1200px"
+             loading="eager"
+          %}
+          <a href="{% include cloudflare-image.html id=image.cloudflare_id size='public' %}" class="download-link" download="{{ image.filename }}">
+            Download Full Resolution
+          </a>
+        </div>
+        {% endif %}
+      {% endfor %}
     {% endif %}
 
     <div class="newsletter-content">

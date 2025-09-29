@@ -15,17 +15,19 @@
 {% assign cf_base = site.cloudflare.images_url %}
 {% assign cf_account = site.cloudflare.account_hash %}
 
-{% comment %} Build the Cloudflare Images URL with variants {% endcomment %}
+{% comment %} Build the Cloudflare Images URL with flexible variants {% endcomment %}
 {% if include.src contains "http" %}
   {% assign image_url = include.src %}
 {% else %}
-  {% assign image_url = cf_base | append: "/" | append: cf_account | append: "/" | append: include.src | append: "/public" %}
+  {% comment %} With flexible variants, use width parameters for responsive images {% endcomment %}
+  {% assign base_url = cf_base | append: "/" | append: cf_account | append: "/" | append: include.src %}
+  {% assign image_url = base_url | append: "/public" %}
 {% endif %}
 
-{% comment %} Generate responsive image URLs {% endcomment %}
-{% assign image_small = image_url | replace: "/public", "/small" %}
-{% assign image_medium = image_url | replace: "/public", "/medium" %}
-{% assign image_large = image_url | replace: "/public", "/large" %}
+{% comment %} Generate responsive image URLs using flexible variants {% endcomment %}
+{% assign image_small = base_url | append: "/w=480" %}
+{% assign image_medium = base_url | append: "/w=768" %}
+{% assign image_large = base_url | append: "/w=1200" %}
 
 <picture>
   <source

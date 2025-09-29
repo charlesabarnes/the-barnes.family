@@ -13,10 +13,27 @@ permalink: /gallery/
     {% assign sorted_albums = site.albums | sort: "date" | reverse %}
     {% for album in sorted_albums %}
     <a href="{{ album.url | relative_url }}" class="album-card">
+      {% comment %} Try to find a cover image: either specified, or first image from folder {% endcomment %}
+      {% assign cover_found = false %}
       {% if album.cover_image %}
+        {% assign cover_found = true %}
+        {% assign cover_id = album.cover_image %}
+      {% elsif album.folder %}
+        {% comment %} Find first image from the album's folder {% endcomment %}
+        {% for image in site.data.images.images %}
+          {% if image.folder == album.folder and image.status == "success" %}
+            {% unless cover_found %}
+              {% assign cover_found = true %}
+              {% assign cover_id = image.cloudflare_id %}
+            {% endunless %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      {% if cover_found %}
       <div class="album-thumbnail">
         {% include cloudflare-image.html
-           src=album.cover_image
+           src=cover_id
            alt=album.title
            sizes="(max-width: 768px) 100vw, 400px"
            loading="lazy"

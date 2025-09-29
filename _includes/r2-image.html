@@ -1,0 +1,58 @@
+{% comment %}
+  Cloudflare R2 Image Integration Helper
+
+  Usage:
+  {% include r2-image.html
+     src="folder/image.jpg"
+     alt="Alt text"
+     sizes="(max-width: 768px) 100vw, 50vw"
+     loading="lazy"
+     class="custom-class"
+     data-full="full-res-url"
+  %}
+{% endcomment %}
+
+{% assign r2_base = site.cloudflare.r2_public_url | default: "https://images.the-barnes.family" %}
+
+{% comment %} Build the R2 URL {% endcomment %}
+{% if include.src contains "http" %}
+  {% assign image_url = include.src %}
+{% else %}
+  {% assign image_url = r2_base | append: "/" | append: include.src %}
+{% endif %}
+
+{% comment %} Generate responsive image URLs using Cloudflare Image Resizing {% endcomment %}
+{% comment %} With transformations enabled on R2, we can resize directly on the R2 domain {% endcomment %}
+{% comment %} Use smaller sizes for gallery thumbnails to improve load times {% endcomment %}
+{% assign image_small = image_url | replace: "https://images.the-barnes.family", "https://images.the-barnes.family/cdn-cgi/image/width=320,quality=80,format=auto" %}
+{% assign image_medium = image_url | replace: "https://images.the-barnes.family", "https://images.the-barnes.family/cdn-cgi/image/width=480,quality=80,format=auto" %}
+{% assign image_large = image_url | replace: "https://images.the-barnes.family", "https://images.the-barnes.family/cdn-cgi/image/width=640,quality=85,format=auto" %}
+{% assign image_xlarge = image_url | replace: "https://images.the-barnes.family", "https://images.the-barnes.family/cdn-cgi/image/width=960,quality=85,format=auto" %}
+
+<picture>
+  <source
+    media="(max-width: 480px)"
+    srcset="{{ image_small }}"
+  >
+  <source
+    media="(max-width: 768px)"
+    srcset="{{ image_medium }}"
+  >
+  <source
+    media="(max-width: 1200px)"
+    srcset="{{ image_large }}"
+  >
+  <source
+    media="(min-width: 1201px)"
+    srcset="{{ image_xlarge }}"
+  >
+  <img
+    src="{{ image_medium }}"
+    alt="{{ include.alt | default: 'Barnes Family Photo' }}"
+    loading="{{ include.loading | default: 'lazy' }}"
+    {% if include.sizes %}sizes="{{ include.sizes }}"{% endif %}
+    {% if include.class %}class="{{ include.class }}"{% endif %}
+    {% if include.data-full %}data-full="{{ include.data-full | default: image_url }}"{% endif %}
+    data-original="{{ image_url }}"
+  >
+</picture>

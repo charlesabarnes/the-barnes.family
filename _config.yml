@@ -69,8 +69,9 @@ jekyll-archives:
 # Cloudflare settings (custom variables)
 cloudflare:
   images_url: "https://imagedelivery.net"
-  account_hash: "YOUR_ACCOUNT_HASH"
-  r2_bucket: "barnes-family-images"
+  account_hash: "JnLIe5neGsZaCQ_O33GPJA"
+  r2_bucket: "family-images"
+  r2_public_url: "https://images.the-barnes.family"
 
 # Exclude from build
 exclude:

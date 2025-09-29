@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Cloudflare Images Upload Script
-# Uploads images from local-images folder to Cloudflare Images
+# Cloudflare R2 Upload Script
+# Uploads images from local-images folder to Cloudflare R2 bucket
 # Saves results as JSON for Jekyll to consume
 
 # Get the script's directory and project root
@@ -11,18 +11,27 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 # Load environment variables from .env file if it exists
 if [ -f "$PROJECT_ROOT/.env" ]; then
     echo "Loading environment variables from .env file..."
-    export $(grep -v '^#' "$PROJECT_ROOT/.env" | xargs)
+    set -a
+    source "$PROJECT_ROOT/.env"
+    set +a
 elif [ -f .env ]; then
     echo "Loading environment variables from .env file..."
-    export $(grep -v '^#' .env | xargs)
+    set -a
+    source .env
+    set +a
 fi
 
-# Configuration - Both should be environment variables
+# Configuration - All should be environment variables
 ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID}"
 API_TOKEN="${CLOUDFLARE_API_TOKEN}"
+R2_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}"
+R2_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}"
+R2_BUCKET="${R2_BUCKET:-family-images}"
+R2_ENDPOINT="${R2_ENDPOINT:-https://${ACCOUNT_ID}.r2.cloudflarestorage.com}"
+R2_PUBLIC_URL="${R2_PUBLIC_URL:-https://images.the-barnes.family}"
 
 # JSON output file
-JSON_FILE="_data/images.json"
+JSON_FILE="_data/r2_images.json"
 
 # Initialize JSON array
 json_array='[]'
@@ -47,18 +56,41 @@ if [ -z "$API_TOKEN" ]; then
     exit 1
 fi
 
+if [ -z "$R2_ACCESS_KEY_ID" ] || [ -z "$R2_SECRET_ACCESS_KEY" ]; then
+    echo -e "${RED}Error: R2 credentials not set${NC}"
+    echo "Please set R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY"
+    exit 1
+fi
+
+# Check if aws CLI is installed
+if ! command -v aws &> /dev/null; then
+    # Try to use local install if available
+    if [ -f ~/.local/bin/aws ]; then
+        export PATH=$PATH:~/.local/bin
+    else
+        echo -e "${RED}AWS CLI not found. Please install it first.${NC}"
+        echo "Run: curl 'https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip' -o 'awscliv2.zip' && unzip awscliv2.zip && ./aws/install --user"
+        exit 1
+    fi
+fi
+
+# Configure AWS CLI for R2
+export AWS_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}"
+export AWS_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}"
+export AWS_DEFAULT_REGION="auto"
+
 # Function to add image to JSON
 add_to_json() {
     local folder="$1"
     local filename="$2"
-    local cloudflare_id="$3"
+    local r2_path="$3"
     local status="$4"
     local url="$5"
 
     # Escape special characters for JSON
     folder=$(echo "$folder" | sed 's/"/\\"/g')
     filename=$(echo "$filename" | sed 's/"/\\"/g')
-    cloudflare_id=$(echo "$cloudflare_id" | sed 's/"/\\"/g')
+    r2_path=$(echo "$r2_path" | sed 's/"/\\"/g')
     url=$(echo "$url" | sed 's/"/\\"/g')
 
     # Create JSON object for this image
@@ -66,7 +98,7 @@ add_to_json() {
 {
   "folder": "$folder",
   "filename": "$filename",
-  "cloudflare_id": "$cloudflare_id",
+  "r2_path": "$r2_path",
   "url": "$url",
   "status": "$status",
   "uploaded_at": "$(date -Iseconds)"
@@ -91,43 +123,41 @@ EOF
 # Function to upload a single image
 upload_image() {
     local file_path=$1
-    local custom_id=$2
+    local r2_path=$2
     local folder=$3
 
     local filename=$(basename "$file_path")
-    echo -e "${YELLOW}Uploading: ${file_path}${NC}"
+    echo -e "${YELLOW}Uploading: ${file_path} to ${r2_path}${NC}"
 
-    response=$(curl -s -X POST \
-        "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/images/v1" \
-        -H "Authorization: Bearer ${API_TOKEN}" \
-        -F "file=@${file_path}" \
-        -F "id=${custom_id}")
+    # Upload to R2 using AWS CLI
+    if aws s3 cp "$file_path" "s3://${R2_BUCKET}/${r2_path}" \
+        --endpoint-url "${R2_ENDPOINT}" \
+        --no-verify-ssl 2>/dev/null; then
 
-    # Check if upload was successful or already exists
-    if echo "$response" | grep -q '"success":[[:space:]]*true'; then
-        echo -e "${GREEN}✓ Successfully uploaded: ${custom_id}${NC}"
-        echo "$custom_id" >> uploaded-images.log
+        echo -e "${GREEN}✓ Successfully uploaded: ${r2_path}${NC}"
 
-        # Extract the URL from the response for reference
-        url=$(echo "$response" | grep -o '"variants":\["[^"]*"' | sed 's/"variants":\["//')
+        # Construct public URL
+        url="${R2_PUBLIC_URL}/${r2_path}"
         echo "  URL: $url"
 
         # Add to JSON
-        add_to_json "$folder" "$filename" "$custom_id" "success" "$url"
-
-    elif echo "$response" | grep -q "Resource already exists"; then
-        echo -e "${YELLOW}⚠ Already exists: ${custom_id}${NC}"
-        echo "$custom_id" >> uploaded-images.log
-
-        # Add to JSON as existing
-        add_to_json "$folder" "$filename" "$custom_id" "existing" ""
+        add_to_json "$folder" "$filename" "$r2_path" "success" "$url"
+        echo "$r2_path" >> uploaded-r2-images.log
 
     else
-        echo -e "${RED}✗ Failed to upload: ${file_path}${NC}"
-        echo "Error response: $response"
+        # Check if file already exists
+        if aws s3 ls "s3://${R2_BUCKET}/${r2_path}" \
+            --endpoint-url "${R2_ENDPOINT}" \
+            --no-verify-ssl 2>/dev/null | grep -q "$filename"; then
 
-        # Add to JSON as failed
-        add_to_json "$folder" "$filename" "$custom_id" "failed" ""
+            echo -e "${YELLOW}⚠ Already exists: ${r2_path}${NC}"
+            url="${R2_PUBLIC_URL}/${r2_path}"
+            add_to_json "$folder" "$filename" "$r2_path" "existing" "$url"
+            echo "$r2_path" >> uploaded-r2-images.log
+        else
+            echo -e "${RED}✗ Failed to upload: ${file_path}${NC}"
+            add_to_json "$folder" "$filename" "$r2_path" "failed" ""
+        fi
     fi
 }
 
@@ -142,31 +172,33 @@ process_directory() {
     for image in "$dir"/*.jpg "$dir"/*.jpeg "$dir"/*.png "$dir"/*.gif "$dir"/*.webp "$dir"/*.mp4 "$dir"/*.mov "$dir"/*.avi "$dir"/*.webm; do
         [ -e "$image" ] || continue
 
-        # Generate custom ID from filename
+        # Generate R2 path from filename
         filename=$(basename "$image")
-        name_without_ext="${filename%.*}"
-        custom_id="${prefix}-${name_without_ext}"
+        r2_path="${prefix}/${filename}"
 
-        # Clean the ID (remove spaces, special chars)
-        custom_id=$(echo "$custom_id" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g')
-
-        upload_image "$image" "$custom_id" "$prefix"
+        upload_image "$image" "$r2_path" "$prefix"
 
         # Small delay to avoid rate limiting
-        sleep 0.5
+        sleep 0.2
     done
 }
 
 # Main execution
 echo "==================================="
-echo "Cloudflare Images Upload Script"
+echo "Cloudflare R2 Upload Script"
 echo "==================================="
+echo "Bucket: ${R2_BUCKET}"
+echo "Public URL: ${R2_PUBLIC_URL}"
+echo ""
 
 # Check if local-images directory exists
 if [ ! -d "local-images" ]; then
     echo -e "${RED}Error: local-images directory not found${NC}"
     exit 1
 fi
+
+# Create log file
+> uploaded-r2-images.log
 
 # Process all directories in local-images automatically
 for dir in local-images/*/; do
@@ -189,13 +221,15 @@ done
 mkdir -p _data
 echo "{" > "$JSON_FILE"
 echo "  \"generated_at\": \"$(date -Iseconds)\"," >> "$JSON_FILE"
+echo "  \"bucket\": \"${R2_BUCKET}\"," >> "$JSON_FILE"
+echo "  \"public_url\": \"${R2_PUBLIC_URL}\"," >> "$JSON_FILE"
 echo "  \"images\": $json_array" >> "$JSON_FILE"
 echo "}" >> "$JSON_FILE"
 
 # Check if any images were uploaded
-if [ -f "uploaded-images.log" ] && [ -s "uploaded-images.log" ]; then
+if [ -f "uploaded-r2-images.log" ] && [ -s "uploaded-r2-images.log" ]; then
     echo -e "\n${GREEN}Upload complete!${NC}"
-    echo "Check uploaded-images.log for list of uploaded image IDs"
+    echo "Check uploaded-r2-images.log for list of uploaded image paths"
     echo "JSON data saved to $JSON_FILE"
 else
     echo -e "\n${YELLOW}No images were uploaded. Check that local-images/ contains subdirectories with images.${NC}"
