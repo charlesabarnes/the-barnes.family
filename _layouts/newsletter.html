@@ -38,7 +38,7 @@ layout: default
              sizes="(max-width: 768px) 100vw, 1200px"
              loading="eager"
           %}
-          <a href="{% include cloudflare-image.html id=image.cloudflare_id size='public' %}" class="download-link" download="{{ image.filename }}">
+          <a href="{{ site.cloudflare.images_url }}/{{ site.cloudflare.account_hash }}/{{ image.cloudflare_id }}/public" class="download-link" download="{{ image.filename }}">
             Download Full Resolution
           </a>
         </div>

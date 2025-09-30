@@ -1,12 +1,13 @@
 ---
 layout: album
-title: Our Elopement Day
-date: 2025-01-15
-location: Mountain Ceremony
-photo_count: 18
-description: "dsdsa."
-cover_image: 2025-elopement-announcement-elopement-announcement-back
-folder: "2025-elopement-announcement"
-stickers: ["wedding", "mountain", "love", "basenji", "border-collie"]
+title: "Elopement Photos"
+date: 2025-07-11
+location: "Saint Louis Zoo"
+cover_image: "2025-bc-honeymoon-100"
+description: "Photos after we got married"
+folder: "2025-bc-honeymoon"
+photo_count: 163
+
 ---
+
 
